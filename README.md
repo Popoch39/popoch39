@@ -57,19 +57,14 @@ I build the plumbing behind maps at [DaVikingCode](https://github.com/DaVikingCo
 
 <div align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://github-readme-stats.vercel.app/api?username=Popoch39&show_icons=true&include_all_commits=true&count_private=true&hide_border=true&bg_color=0d1117&title_color=2dd4bf&text_color=8b949e&icon_color=d29922&hide_title=true">
-    <source media="(prefers-color-scheme: light)" srcset="https://github-readme-stats.vercel.app/api?username=Popoch39&show_icons=true&include_all_commits=true&count_private=true&hide_border=true&bg_color=ffffff&title_color=0f766e&text_color=57606a&icon_color=b45309&hide_title=true">
-    <img src="https://github-readme-stats.vercel.app/api?username=Popoch39&show_icons=true&include_all_commits=true&count_private=true&hide_border=true&bg_color=0d1117&title_color=2dd4bf&text_color=8b949e&icon_color=d29922&hide_title=true" alt="GitHub stats" height="165">
-  </picture>
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://github-readme-stats.vercel.app/api/top-langs/?username=Popoch39&layout=compact&hide_border=true&bg_color=0d1117&title_color=2dd4bf&text_color=8b949e&hide_title=true&langs_count=6">
-    <source media="(prefers-color-scheme: light)" srcset="https://github-readme-stats.vercel.app/api/top-langs/?username=Popoch39&layout=compact&hide_border=true&bg_color=ffffff&title_color=0f766e&text_color=57606a&hide_title=true&langs_count=6">
-    <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=Popoch39&layout=compact&hide_border=true&bg_color=0d1117&title_color=2dd4bf&text_color=8b949e&hide_title=true&langs_count=6" alt="Top languages" height="165">
+    <source media="(prefers-color-scheme: dark)" srcset="assets/langs-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/langs-light.svg">
+    <img src="assets/langs-dark.svg" alt="Top languages" width="640">
   </picture>
 </div>
 
 <br>
 
 <div align="center">
-  <sub>46.9037° N · 5.7745° E — <a href="mailto:louis.pocheron@davikingcode.com">louis.pocheron@davikingcode.com</a></sub>
+  <sub>47.2378° N · 6.0241° E — <a href="mailto:louis.pocheron@davikingcode.com">louis.pocheron@davikingcode.com</a></sub>
 </div>
