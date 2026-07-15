@@ -1,16 +1,75 @@
+<div align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/header-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/header-light.svg">
+    <img src="assets/header-dark.svg" alt="Louis Pocheron — Geospatial Software Engineer" width="100%">
+  </picture>
+</div>
 
-# 💻 Tech Stack:
-![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white) ![Lua](https://img.shields.io/badge/Lua-2C2D72?style=flat&logo=lua&logoColor=white) ![PHP](https://img.shields.io/badge/php-%23777BB4.svg?style=for-the-badge&logo=php&logoColor=white) ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E) ![Vercel](https://img.shields.io/badge/vercel-%23000000.svg?style=for-the-badge&logo=vercel&logoColor=white) ![Astro](https://img.shields.io/badge/astro-%232C2052.svg?style=for-the-badge&logo=astro&logoColor=white) ![Symfony](https://img.shields.io/badge/symfony-%23000000.svg?style=for-the-badge&logo=symfony&logoColor=white) ![Socket.io](https://img.shields.io/badge/Socket.io-black?style=for-the-badge&logo=socket.io&badgeColor=010101) ![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB) ![React Query](https://img.shields.io/badge/-React%20Query-FF4154?style=for-the-badge&logo=react%20query&logoColor=white) ![Next JS](https://img.shields.io/badge/Next-black?style=for-the-badge&logo=next.js&logoColor=white) ![MySQL](https://img.shields.io/badge/mysql-4479A1.svg?style=for-the-badge&logo=mysql&logoColor=white) ![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white) ![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white) ![Git](https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white)
-# 📊 GitHub Stats:
+I build the plumbing behind maps at [DaVikingCode](https://github.com/DaVikingCode) — tile servers, caches and pointcloud tooling. TypeScript for the front of the map, Rust and Go for the fast parts underneath.
 
+<br>
 
-![](https://github-readme-stats.vercel.app/api/top-langs/?username=Popoch39&theme=dark&hide_border=false&include_all_commits=true&count_private=true&layout=compact)\
-![](https://github-readme-streak-stats.herokuapp.com/?user=Popoch39&theme=dark&hide_border=false)<br/>
+## Stack
 
-### 🔝 Top Contributed Repo
-![](https://github-contributor-stats.vercel.app/api?username=Popoch39&limit=5&theme=dark&combine_all_yearly_contributions=true)
+|  |  |
+|--:|:--|
+| **Geospatial** | ![PostGIS](https://img.shields.io/badge/PostGIS-0f766e?style=flat-square&logo=postgresql&logoColor=white) ![MapLibre](https://img.shields.io/badge/MapLibre_GL-0f766e?style=flat-square&logo=maplibre&logoColor=white) ![OpenLayers](https://img.shields.io/badge/OpenLayers-0f766e?style=flat-square&logo=openlayers&logoColor=white) ![MapProxy](https://img.shields.io/badge/MapProxy-0f766e?style=flat-square) ![LAS/LAZ](https://img.shields.io/badge/LAS%2FLAZ-0f766e?style=flat-square) |
+| **Languages** | ![TypeScript](https://img.shields.io/badge/TypeScript-0f766e?style=flat-square&logo=typescript&logoColor=white) ![Rust](https://img.shields.io/badge/Rust-0f766e?style=flat-square&logo=rust&logoColor=white) ![Go](https://img.shields.io/badge/Go-0f766e?style=flat-square&logo=go&logoColor=white) ![Lua](https://img.shields.io/badge/Lua-0f766e?style=flat-square&logo=lua&logoColor=white) |
+| **Runtime & tools** | ![Bun](https://img.shields.io/badge/Bun-0f766e?style=flat-square&logo=bun&logoColor=white) ![Node.js](https://img.shields.io/badge/Node.js-0f766e?style=flat-square&logo=nodedotjs&logoColor=white) ![Docker](https://img.shields.io/badge/Docker-0f766e?style=flat-square&logo=docker&logoColor=white) ![Neovim](https://img.shields.io/badge/Neovim-0f766e?style=flat-square&logo=neovim&logoColor=white) ![tmux](https://img.shields.io/badge/tmux-0f766e?style=flat-square&logo=tmux&logoColor=white) |
 
----
-[![](https://visitcount.itsvg.in/api?id=Popoch39&icon=0&color=0)](https://visitcount.itsvg.in)
+## Featured projects
 
-<!-- Proudly created with GPRM ( https://gprm.itsvg.in ) -->
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <b><a href="https://github.com/Popoch39/pointcloud-viewer">pointcloud-viewer</a></b> · <code>TypeScript</code><br>
+      <sub>LiDAR point clouds rendered in the browser.</sub>
+    </td>
+    <td width="50%" valign="top">
+      <b><a href="https://github.com/Popoch39/maptile_cacher">maptile_cacher</a></b> · <code>Rust</code><br>
+      <sub>Fast caching layer for map tiles.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td valign="top">
+      <b><a href="https://github.com/Popoch39/LasConverter">LasConverter</a></b> · <code>Rust</code><br>
+      <sub>LAS/LAZ pointcloud conversion tooling.</sub>
+    </td>
+    <td valign="top">
+      <b><a href="https://github.com/Popoch39/mapproxy">mapproxy</a></b> · <code>Go</code><br>
+      <sub>Map tile proxy server.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td valign="top">
+      <b><a href="https://github.com/Popoch39/claude-tmux-notify.nvim">claude-tmux-notify.nvim</a></b> · <code>Lua</code><br>
+      <sub>Neovim toast when a Claude Code session in another tmux window needs you.</sub>
+    </td>
+    <td valign="top">
+      <b><a href="https://github.com/Popoch39/gis_3d">gis_3d</a></b> · <code>TypeScript</code><br>
+      <sub>3D terrain and geodata visualisation experiments.</sub>
+    </td>
+  </tr>
+</table>
+
+## Stats
+
+<div align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://github-readme-stats.vercel.app/api?username=Popoch39&show_icons=true&include_all_commits=true&count_private=true&hide_border=true&bg_color=0d1117&title_color=2dd4bf&text_color=8b949e&icon_color=d29922&hide_title=true">
+    <source media="(prefers-color-scheme: light)" srcset="https://github-readme-stats.vercel.app/api?username=Popoch39&show_icons=true&include_all_commits=true&count_private=true&hide_border=true&bg_color=ffffff&title_color=0f766e&text_color=57606a&icon_color=b45309&hide_title=true">
+    <img src="https://github-readme-stats.vercel.app/api?username=Popoch39&show_icons=true&include_all_commits=true&count_private=true&hide_border=true&bg_color=0d1117&title_color=2dd4bf&text_color=8b949e&icon_color=d29922&hide_title=true" alt="GitHub stats" height="165">
+  </picture>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://github-readme-stats.vercel.app/api/top-langs/?username=Popoch39&layout=compact&hide_border=true&bg_color=0d1117&title_color=2dd4bf&text_color=8b949e&hide_title=true&langs_count=6">
+    <source media="(prefers-color-scheme: light)" srcset="https://github-readme-stats.vercel.app/api/top-langs/?username=Popoch39&layout=compact&hide_border=true&bg_color=ffffff&title_color=0f766e&text_color=57606a&hide_title=true&langs_count=6">
+    <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=Popoch39&layout=compact&hide_border=true&bg_color=0d1117&title_color=2dd4bf&text_color=8b949e&hide_title=true&langs_count=6" alt="Top languages" height="165">
+  </picture>
+</div>
+
+<br>
+
+<div align="center">
+  <sub>46.9037° N · 5.7745° E — <a href="mailto:louis.pocheron@davikingcode.com">louis.pocheron@davikingcode.com</a></sub>
+</div>

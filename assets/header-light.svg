@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="260" viewBox="0 0 1000 260" role="img" aria-label="Louis Pocheron — Geospatial Software Engineer">
+  <style>
+    .serif { font-family: Georgia, 'Times New Roman', serif; }
+    .mono  { font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; }
+    .contour {
+      fill: none;
+      stroke: #0f766e;
+      vector-effect: non-scaling-stroke;
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      animation: draw 2.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    .c0 { stroke-width: 1.6; stroke-opacity: 0.9;  animation-delay: 0s;   }
+    .c1 { stroke-width: 1;   stroke-opacity: 0.55; animation-delay: .15s; }
+    .c2 { stroke-width: 1;   stroke-opacity: 0.45; animation-delay: .3s;  }
+    .c3 { stroke-width: 1.6; stroke-opacity: 0.75; animation-delay: .45s; }
+    .c4 { stroke-width: 1;   stroke-opacity: 0.4;  animation-delay: .6s;  }
+    .c5 { stroke-width: 1;   stroke-opacity: 0.35; animation-delay: .75s; }
+    .c6 { stroke-width: 1;   stroke-opacity: 0.3;  animation-delay: .9s;  }
+    .fade { opacity: 0; animation: fadein 1s ease-out forwards; }
+    .f1 { animation-delay: .2s; }
+    .f2 { animation-delay: .5s; }
+    .f3 { animation-delay: .8s; }
+    .f4 { animation-delay: 1.2s; }
+    .pulse {
+      transform-origin: 740px 128px;
+      animation: pulse 3s ease-out 1.6s infinite;
+      opacity: 0;
+    }
+    @keyframes draw   { to { stroke-dashoffset: 0; } }
+    @keyframes fadein { to { opacity: 1; } }
+    @keyframes pulse {
+      0%   { opacity: .7; transform: scale(.3); }
+      70%  { opacity: 0;  transform: scale(1.4); }
+      100% { opacity: 0;  transform: scale(1.4); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .contour { animation: none; stroke-dashoffset: 0; }
+      .fade    { animation: none; opacity: 1; }
+      .pulse   { animation: none; opacity: 0; }
+    }
+  </style>
+
+  <!-- background -->
+  <rect width="1000" height="260" fill="#ffffff"/>
+
+  <!-- faint tile grid -->
+  <g stroke="#eff2f5" stroke-width="1">
+    <path d="M76 0V260 M152 0V260 M228 0V260 M304 0V260 M380 0V260 M456 0V260 M532 0V260 M608 0V260 M684 0V260 M760 0V260 M836 0V260 M912 0V260"/>
+    <path d="M0 65H1000 M0 130H1000 M0 195H1000"/>
+  </g>
+
+  <!-- map sheet frame -->
+  <rect x="14.5" y="14.5" width="971" height="231" fill="none" stroke="#d0d7de" stroke-width="1"/>
+  <!-- graticule ticks -->
+  <g stroke="#8c959f" stroke-width="1">
+    <path d="M255 14.5v7 M500 14.5v7 M745 14.5v7"/>
+    <path d="M255 245.5v-7 M500 245.5v-7 M745 245.5v-7"/>
+    <path d="M14.5 130h7 M985.5 130h-7"/>
+  </g>
+  <!-- corner coordinates -->
+  <g class="mono fade f1" font-size="10" fill="#57606a" letter-spacing="1">
+    <text x="24" y="34">46.9037° N</text>
+    <text x="976" y="34" text-anchor="end">5.7745° E</text>
+  </g>
+
+  <!-- contour hill (right side), clipped to the map neatline -->
+  <clipPath id="sheet"><rect x="15" y="15" width="970" height="230"/></clipPath>
+  <g class="fade" opacity="0" clip-path="url(#sheet)">
+    <g transform="translate(740 128)">
+      <path class="contour c6" pathLength="1" transform="translate(-14 9) scale(1.55)"  d="M-150 10C-140-60-80-95-10-100 60-105 130-70 150-10 165 45 120 90 50 100-20 112-135 80-150 10Z"/>
+      <path class="contour c5" pathLength="1" transform="translate(9 -7) scale(1.28)"   d="M-150 10C-138-58-82-96-10-100 58-104 132-68 150-10 163 42 118 92 50 100-24 110-137 78-150 10Z"/>
+      <path class="contour c4" pathLength="1" transform="translate(-6 8) scale(1.04)"   d="M-150 10C-142-56-78-98-10-100 62-102 128-72 150-10 160 44 122 88 50 100-18 110-133 82-150 10Z"/>
+      <path class="contour c3" pathLength="1" transform="translate(6 -4) scale(0.82)"   d="M-150 10C-136-60-84-94-10-100 56-106 134-66 150-10 166 40 116 94 50 100-26 108-139 76-150 10Z"/>
+      <path class="contour c2" pathLength="1" transform="translate(-5 4) scale(0.6)"    d="M-150 10C-144-54-76-100-10-100 64-100 126-74 150-10 158 46 124 86 50 100-16 112-131 84-150 10Z"/>
+      <path class="contour c1" pathLength="1" transform="translate(3 3) scale(0.4)"     d="M-150 10C-138-58-82-96-10-100 58-104 132-68 150-10 163 42 118 92 50 100-24 110-137 78-150 10Z"/>
+      <path class="contour c0" pathLength="1" transform="scale(0.22)"                   d="M-150 10C-140-60-80-95-10-100 60-105 130-70 150-10 165 45 120 90 50 100-20 112-135 80-150 10Z"/>
+    </g>
+    <!-- index-contour elevation label -->
+    <g class="mono fade f3" font-size="10" fill="#0f766e" opacity="0">
+      <rect x="806" y="171" width="38" height="14" fill="#ffffff"/>
+      <text x="825" y="182" text-anchor="middle" letter-spacing="1">402</text>
+    </g>
+  </g>
+
+  <!-- summit marker -->
+  <circle class="pulse" cx="740" cy="128" r="22" fill="none" stroke="#b45309" stroke-width="1.5"/>
+  <g class="fade f4">
+    <circle cx="740" cy="128" r="7" fill="none" stroke="#b45309" stroke-width="1.5"/>
+    <circle cx="740" cy="128" r="2.5" fill="#b45309"/>
+  </g>
+
+  <!-- text block -->
+  <g>
+    <text class="mono fade f1" x="60" y="86" font-size="12" fill="#b45309" letter-spacing="3">◉ ARBOIS, FRANCE</text>
+    <text class="serif fade f2" x="58" y="136" font-size="46" fill="#1f2328" letter-spacing="1">Louis Pocheron</text>
+    <text class="mono fade f3" x="60" y="168" font-size="14" fill="#0f766e" letter-spacing="4">GEOSPATIAL SOFTWARE ENGINEER</text>
+    <text class="mono fade f4" x="60" y="196" font-size="12" fill="#57606a" letter-spacing="1">maps · tiles · pointclouds — @ DaVikingCode</text>
+  </g>
+
+  <!-- scale bar -->
+  <g class="fade f4">
+    <g stroke="#57606a" stroke-width="1">
+      <path d="M60 222h120 M60 218v8 M120 218v8 M180 218v8"/>
+    </g>
+    <rect x="60" y="220" width="30" height="4" fill="#57606a"/>
+    <rect x="120" y="220" width="30" height="4" fill="#57606a"/>
+    <text class="mono" x="188" y="226" font-size="9" fill="#57606a">1:25 000</text>
+  </g>
+</svg>
