@@ -11,7 +11,6 @@ I build the plumbing behind maps at [DaVikingCode](https://github.com/DaVikingCo
 <br>
 
 ## Stack
-
 |  |  |
 |--:|:--|
 | **Geospatial** | ![PostGIS](https://img.shields.io/badge/PostGIS-0f766e?style=flat-square&logo=postgresql&logoColor=white) ![MapLibre](https://img.shields.io/badge/MapLibre_GL-0f766e?style=flat-square&logo=maplibre&logoColor=white) ![OpenLayers](https://img.shields.io/badge/OpenLayers-0f766e?style=flat-square&logo=openlayers&logoColor=white) ![MapProxy](https://img.shields.io/badge/MapProxy-0f766e?style=flat-square) ![LAS/LAZ](https://img.shields.io/badge/LAS%2FLAZ-0f766e?style=flat-square) |
