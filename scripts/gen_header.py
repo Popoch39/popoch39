@@ -1,273 +1,192 @@
 #!/usr/bin/env python3
-"""Generate assets/header-dark.svg and header-light.svg — the profile hero card.
+"""Generate assets/header-light.svg and header-dark.svg — the profile's hero, after louis-pocheron.com.
 
-A synthetic topographic sheet of an imaginary Besançon-like terrain: a height
-field (sum of anisotropic gaussians) contoured with marching squares, SE-flank
-hachures from the gradient, a Doubs-style river meander, map furniture
-(neatline, graticule, north arrow, scale bar) and the title block.
+The site's hero (03 · Méridien) on one sheet: the graticule round Besançon at a true minute pitch,
+the name standing on the parallel that runs to the marker, the lede typing its versions as the site's
+Vim buffer does, the scale, and the statusline. Palette and fonts from charte.py.
 Run: python3 scripts/gen_header.py
 """
 import math
 from pathlib import Path
 
-W, H = 1000, 260
-# terrain occupies the right part of the sheet, clipped to the neatline
-TX0, TX1, TY0, TY1 = 455, 984.5, 15.5, 244.5
+from charte import MONO, MONO_FACE, THEMES, font_face
 
-THEMES = {
-    "dark": {
-        "bg": "#0d1117", "grid": "#21262d", "frame": "#30363d", "tick": "#484f58",
-        "ink": "#e6edf3", "muted": "#8b949e", "contour": "#2dd4bf",
-        "accent": "#d29922", "river": "#58a6ff",
-    },
-    "light": {
-        "bg": "#ffffff", "grid": "#eff2f5", "frame": "#d0d7de", "tick": "#8c959f",
-        "ink": "#1f2328", "muted": "#57606a", "contour": "#0f766e",
-        "accent": "#b45309", "river": "#0969da",
-    },
-}
+W, H = 1000, 340
+# The map's frame, and the statusline under it.
+FX0, FY0, FX1, FY1 = 16.5, 56.5, 983.5, 300.5
+BAR_Y = 316
 
-# ---------------------------------------------------------------- height field
-PEAKS = [  # (cx, cy, sx, sy, rot_deg, amplitude) — two summits and a ridge
-    (795, 105, 105, 62, -18, 1.00),
-    (585, 68, 78, 46, 22, 0.62),
-    (925, 195, 60, 42, -30, 0.48),
-    # valley along the river course (negative -> keeps contours off the water)
-    (640, 228, 130, 34, -6, -0.55),
-    (480, 200, 70, 40, 15, -0.35),
+LAT, LON = 47.2378, 6.0241
+# The marker stands at 64 % of the map's width, as on the desktop site; the parallel at its height.
+MX, MY = 640, 200
+# One minute of latitude, px (two thirds of the site's 120); a minute of longitude narrows with the latitude.
+LAT_MINUTE = 80
+LON_MINUTE = LAT_MINUTE * math.cos(math.radians(LAT))
+
+NAME_SIZE = 96
+LEDE_SIZE = 20
+LEDE_X, LEDE_Y = 56, 242
+CHAR = 0.6 * LEDE_SIZE  # Fragment Mono advances 600/1000 em
+
+# The site's lede (src/i18n/en.ts): "I build {what} for your {whose}." and who each version is for.
+VERSIONS = [
+    ("the maps", "power grid", "major energy companies"),
+    ("the site", "guesthouse", "guesthouses and B&Bs"),
+    ("the online store", "shop", "local shops"),
+    ("the website", "restaurant", "restaurants, cafés and bakeries"),
+    ("the appointment booking", "salon", "craftspeople, hairdressers and beauty salons"),
+    ("the API", "back office", "product teams"),
+    ("the map", "town", "town halls and local authorities"),
+    ("the tool", "field team", "field workers"),
 ]
+SLOT = 4.0  # s per version
+TYPING = 1.4  # s to type a line
+CYCLE = SLOT * len(VERSIONS)
 
 
-def height(x, y):
-    h = 0.0
-    for cx, cy, sx, sy, rot, a in PEAKS:
-        t = math.radians(rot)
-        dx, dy = x - cx, y - cy
-        u = dx * math.cos(t) + dy * math.sin(t)
-        v = -dx * math.sin(t) + dy * math.cos(t)
-        h += a * math.exp(-(u * u / (2 * sx * sx) + v * v / (2 * sy * sy)))
-    return h
+def esc(text):
+    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
-def gradient(x, y, eps=1.5):
-    gx = (height(x + eps, y) - height(x - eps, y)) / (2 * eps)
-    gy = (height(x, y + eps) - height(x, y - eps)) / (2 * eps)
-    return gx, gy
+def angle(minutes):
+    return f"{int(minutes // 60)}°{int(minutes % 60):02d}′"
 
 
-# ------------------------------------------------------------ marching squares
-def contour_polylines(level, nx=176, ny=88):
-    xs = [TX0 + (TX1 - TX0) * i / nx for i in range(nx + 1)]
-    ys = [TY0 + (TY1 - TY0) * j / ny for j in range(ny + 1)]
-    grid = [[height(x, y) for x in xs] for y in ys]
-
-    def interp(pa, pb, va, vb):
-        t = (level - va) / (vb - va)
-        return (pa[0] + t * (pb[0] - pa[0]), pa[1] + t * (pb[1] - pa[1]))
-
-    segs = []
-    for j in range(ny):
-        for i in range(nx):
-            v = [grid[j][i], grid[j][i + 1], grid[j + 1][i + 1], grid[j + 1][i]]
-            p = [(xs[i], ys[j]), (xs[i + 1], ys[j]), (xs[i + 1], ys[j + 1]), (xs[i], ys[j + 1])]
-            idx = sum(1 << k for k in range(4) if v[k] > level)
-            if idx in (0, 15):
-                continue
-            e = {}
-            for k in range(4):
-                a, b = k, (k + 1) % 4
-                if (v[a] > level) != (v[b] > level):
-                    e[k] = interp(p[a], p[b], v[a], v[b])
-            ks = sorted(e)
-            if len(ks) == 2:
-                segs.append((e[ks[0]], e[ks[1]]))
-            elif len(ks) == 4:  # saddle: pair edges 0-1 / 2-3
-                segs.append((e[0], e[1]))
-                segs.append((e[2], e[3]))
-
-    key = lambda pt: (round(pt[0] * 4), round(pt[1] * 4))
-    adj = {}
-    for a, b in segs:
-        adj.setdefault(key(a), []).append((a, b))
-        adj.setdefault(key(b), []).append((b, a))
-
-    seen, lines = set(), []
-    def walk(start_pt):
-        line = [start_pt]
-        cur = start_pt
-        while True:
-            nxt = None
-            for a, b in adj.get(key(cur), []):
-                sk = tuple(sorted((key(a), key(b))))
-                if sk not in seen:
-                    seen.add(sk)
-                    nxt = b
-                    break
-            if nxt is None:
-                return line
-            line.append(nxt)
-            cur = nxt
-
-    ends = [k for k, lst in adj.items() if len(lst) == 1]
-    for k in ends:
-        for a, _ in adj[k]:
-            line = walk(a)
-            if len(line) > 4:
-                lines.append(line)
-    for k, lst in adj.items():  # remaining closed loops
-        for a, b in lst:
-            sk = tuple(sorted((key(a), key(b))))
-            if sk not in seen:
-                line = walk(a)
-                if len(line) > 8:
-                    lines.append(line)
-    return lines
+def sexagesimal(value):
+    s = round(abs(value) * 3600)
+    return f"{s // 3600}°{s // 60 % 60:02d}′{s % 60:02d}″"
 
 
-def path_d(line):
-    d = f"M{line[0][0]:.1f} {line[0][1]:.1f}"
-    for x, y in line[1:]:
-        d += f"L{x:.1f} {y:.1f}"
-    return d
-
-
-# ------------------------------------------------------------------- hachures
-def hachures():
+def graticule(t):
+    """Whole minutes inside the frame, their lines and, every other one, their tick."""
     out = []
-    step = 11
-    y = TY0 + 6
-    while y < TY1 - 6:
-        x = TX0 + 6
-        while x < TX1 - 6:
-            h = height(x, y)
-            gx, gy = gradient(x, y)
-            mag = math.hypot(gx, gy)
-            if 0.22 < h < 0.82 and mag > 0.0035:
-                dx, dy = -gx / mag, -gy / mag  # downhill
-                if (dx + dy) / math.sqrt(2) > 0.25:  # SE-facing flank
-                    l = 6.5
-                    out.append((x, y, x + dx * l, y + dy * l))
-            x += step
-        y += step
-    return out
+    lon0 = LON * 60
+    lines = []
+    m = math.ceil(lon0 - (MX - FX0) / LON_MINUTE)
+    while (x := MX + (m - lon0) * LON_MINUTE) < FX1:
+        lines.append(f"M{x:.1f} {FY0}V{FY1}")
+        if m % 2 == 0 and 40 < x < FX1 - 70:
+            out.append(f'<text x="{x:.1f}" y="{FY0 + 17}" text-anchor="middle">{angle(m)}</text>')
+        m += 1
+    lat0 = LAT * 60
+    m = math.floor(lat0 + (MY - FY0) / LAT_MINUTE)
+    while (y := MY - (m - lat0) * LAT_MINUTE) < FY1:
+        if y > FY0 + 10:  # a line hugging the frame would read as a double border
+            lines.append(f"M{FX0} {y:.1f}H{FX1}")
+            if FY0 + 30 < y < FY1 - 10:
+                out.append(f'<text x="{FX1 - 12}" y="{y - 6:.1f}" text-anchor="end">{angle(m)}</text>')
+        m -= 1
+    return (f'<path d="{" ".join(lines)}" stroke="{t["rule"]}" stroke-width="1"/>'
+            f'<g class="mono" font-size="10" fill="{t["muted"]}" letter-spacing="0.5">{"".join(out)}</g>')
 
 
-# ---------------------------------------------------------------------- river
-RIVER = ("M462 236"
-         "C505 231 540 234 566 226"
-         "C592 218 596 200 615 188"
-         "C634 176 660 174 674 186"
-         "C688 198 684 216 666 222"
-         "C648 228 632 224 626 232"
-         "C622 238 640 242 668 240"
-         "C710 236 742 238 790 234"
-         "C850 229 920 236 984 228")
+def lede(t):
+    """Each version types itself in its slot, behind a block cursor, then gives way to the next."""
+    css, groups = [], []
+    for i, (what, whose, audience) in enumerate(VERSIONS):
+        before, between = "I build ", " for your "
+        line = f"{before}{what}{between}{whose}."
+        width = len(line) * CHAR
+        x_what = LEDE_X + len(before) * CHAR
+        x_whose = x_what + len(what + between) * CHAR
+        typed = 100 * TYPING / CYCLE
+        css.append(
+            f"@keyframes type{i} {{ 0% {{ transform: translateX(0); animation-timing-function: steps({len(line)}, end); }}"
+            f" {typed:.2f}%, 100% {{ transform: translateX({width:.0f}px); }} }}"
+            f" .v{i} {{ animation-delay: {i * SLOT:.0f}s; }} .v{i} .typed {{ animation: type{i} {CYCLE:.0f}s {i * SLOT:.0f}s infinite; }}")
+        underline = lambda x, word: (f'<rect x="{x:.1f}" y="{LEDE_Y + 6}" width="{len(word) * CHAR:.1f}" height="3" '
+                                     f'fill="{t["accent"]}"/>')
+        groups.append(
+            f'<g class="v v{i}"{"" if i == 0 else " opacity=\"0\""}>'
+            f'<clipPath id="typed{i}"><rect class="typed" x="{LEDE_X - width:.1f}" y="{LEDE_Y - 22}" '
+            f'width="{width:.1f}" height="34" style="transform: translateX({width:.0f}px)"/></clipPath>'
+            f'<g clip-path="url(#typed{i})">'
+            f'<text class="mono" x="{LEDE_X}" y="{LEDE_Y}" font-size="{LEDE_SIZE}" fill="{t["ink"]}" xml:space="preserve">{esc(line)}</text>'
+            f'{underline(x_what, what)}{underline(x_whose, whose)}</g>'
+            f'<rect class="typed" x="{LEDE_X}" y="{LEDE_Y - 18}" width="{CHAR:.0f}" height="24" fill="{t["accent"]}" '
+            f'style="transform: translateX({width:.0f}px)"/>'
+            f'<g class="mono" font-size="11" fill="{t["muted"]}">'
+            f'<text x="{LEDE_X}" y="{LEDE_Y + 30}">version {i + 1}/{len(VERSIONS)}</text>'
+            f'<text x="{LEDE_X}" y="{LEDE_Y + 46}">for: {esc(audience)}</text></g></g>')
+    return "\n".join(css), "\n".join(groups)
 
-# ------------------------------------------------------------------ rendering
+
+def statusline(t):
+    y, h = BAR_Y, H - BAR_Y
+    mid = y + h / 2 + 4
+    return (f'<rect y="{y}" width="{W}" height="{h}" fill="{t["bar"]}"/>'
+            f'<rect y="{y}" width="72" height="{h}" fill="{t["accent"]}"/>'
+            f'<rect x="{W - 44}" y="{y}" width="44" height="{h}" fill="{t["accent"]}"/>'
+            f'<g class="mono" font-size="11">'
+            f'<text x="36" y="{mid}" text-anchor="middle" fill="{t["on_accent"]}" font-weight="bold">NORMAL</text>'
+            f'<text x="88" y="{mid}" fill="{t["on_bar"]}">main</text>'
+            f'<text x="140" y="{mid}" fill="{t["on_bar"]}">~/louis/README.md</text>'
+            f'<text x="{W - 100}" y="{mid}" text-anchor="end" fill="{t["on_bar_muted"]}">utf-8 · markdown</text>'
+            f'<text x="{W - 60}" y="{mid}" text-anchor="end" fill="{t["on_bar"]}">Top</text>'
+            f'<text x="{W - 22}" y="{mid}" text-anchor="middle" fill="{t["on_accent"]}">:wq</text></g>')
+
+
 def render(mode):
     t = THEMES[mode]
-    levels = [0.14, 0.24, 0.34, 0.44, 0.54, 0.64, 0.74, 0.84, 0.93]
-    index_levels = {0.34, 0.64}
-
-    s = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" role="img" aria-label="Louis Pocheron — Geospatial Software Engineer">',
-         "<style>",
-         ".serif { font-family: Georgia, 'Times New Roman', serif; }",
-         ".mono  { font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; }",
-         ".draw { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 2s cubic-bezier(0.4,0,0.2,1) forwards; }",
-         ".fade { opacity: 0; animation: fadein .9s ease-out forwards; }",
-         ".f1 { animation-delay: .2s; } .f2 { animation-delay: .5s; }",
-         ".f3 { animation-delay: .8s; } .f4 { animation-delay: 1.1s; }",
-         ".hach { opacity: 0; animation: fadein 1.4s ease-out 2.1s forwards; }",
-         f".pulse {{ transform-origin: var(--peak); animation: pulse 3s ease-out 2s infinite; opacity: 0; }}",
-         "@keyframes draw { to { stroke-dashoffset: 0; } }",
-         "@keyframes fadein { to { opacity: 1; } }",
-         "@keyframes pulse { 0% { opacity:.7; transform: scale(.3); } 70%,100% { opacity:0; transform: scale(1.4); } }",
-         "@media (prefers-reduced-motion: reduce) {",
-         "  .draw { animation: none; stroke-dashoffset: 0; }",
-         "  .fade, .hach { animation: none; opacity: 1; }",
-         "  .pulse { animation: none; opacity: 0; } }",
-         "</style>",
-         f'<rect width="{W}" height="{H}" fill="{t["bg"]}"/>']
-
-    # faint tile grid
-    vlines = " ".join(f"M{x} 0V{H}" for x in range(76, W, 76))
-    hlines = " ".join(f"M0 {y}H{W}" for y in range(65, H, 65))
-    s.append(f'<g stroke="{t["grid"]}" stroke-width="1"><path d="{vlines}"/><path d="{hlines}"/></g>')
-
-    # neatline + graticule
-    s.append(f'<rect x="14.5" y="14.5" width="971" height="231" fill="none" stroke="{t["frame"]}" stroke-width="1"/>')
-    s.append(f'<g stroke="{t["tick"]}" stroke-width="1"><path d="M255 14.5v7 M500 14.5v7 M745 14.5v7 '
-             f'M255 245.5v-7 M500 245.5v-7 M745 245.5v-7 M14.5 130h7 M985.5 130h-7"/></g>')
-    s.append(f'<g class="mono fade f1" font-size="10" fill="{t["muted"]}" letter-spacing="1">'
-             f'<text x="24" y="34">47.2378° N</text>'
-             f'<text x="976" y="34" text-anchor="end">6.0241° E</text></g>')
-
-    # ---- terrain (clipped) ----
-    s.append(f'<clipPath id="terrain"><rect x="{TX0}" y="{TY0}" width="{TX1-TX0}" height="{TY1-TY0}"/></clipPath>')
-    s.append('<g clip-path="url(#terrain)">')
-
-    # hachures (under the contours)
-    hd = " ".join(f"M{a:.1f} {b:.1f}L{c:.1f} {d:.1f}" for a, b, c, d in hachures())
-    s.append(f'<path class="hach" d="{hd}" stroke="{t["contour"]}" stroke-width="1" stroke-opacity="0.22" fill="none"/>')
-
-    # contours
-    label_spots = {}
-    for li, lv in enumerate(levels):
-        idx = lv in index_levels
-        width_ = 1.5 if idx else 1
-        op = 0.85 if idx else max(0.3, 0.28 + 0.5 * lv)
-        delay = 0.10 * li
-        for line in contour_polylines(lv):
-            s.append(f'<path class="draw" style="animation-delay:{delay:.2f}s" d="{path_d(line)}" '
-                     f'pathLength="1" fill="none" stroke="{t["contour"]}" stroke-opacity="{op:.2f}" '
-                     f'stroke-width="{width_}" stroke-linejoin="round" stroke-linecap="round"/>')
-            if idx and lv not in label_spots and len(line) > 120:
-                label_spots[lv] = line[len(line) // 3]
-
-    # elevation labels on index contours (one cote per level)
-    cotes = {0.34: "270", 0.64: "330"}
-    for lv, (lx, ly) in label_spots.items():
-        s.append(f'<g class="fade f3"><rect x="{lx-14:.0f}" y="{ly-7:.0f}" width="28" height="13" fill="{t["bg"]}"/>'
-                 f'<text class="mono" x="{lx:.0f}" y="{ly+3:.0f}" font-size="9.5" fill="{t["contour"]}" '
-                 f'text-anchor="middle" letter-spacing="1">{cotes[lv]}</text></g>')
-
-    # the river
-    s.append(f'<path class="draw" style="animation-delay:1.1s;animation-duration:1.8s" d="{RIVER}" pathLength="1" '
-             f'fill="none" stroke="{t["river"]}" stroke-width="1.6" stroke-opacity="0.85" stroke-linecap="round"/>')
-    s.append('</g>')  # /terrain clip
-    # river label, outside the clip so it isn't cut by the neatline
-    s.append(f'<g class="fade f4"><rect x="748" y="222" width="66" height="14" fill="{t["bg"]}" fill-opacity="0.85"/>'
-             f'<text class="serif" x="752" y="233" font-size="12" font-style="italic" '
-             f'fill="{t["river"]}" fill-opacity="0.9" letter-spacing="1">le Doubs</text></g>')
-
-    # summit marker (at the main peak)
-    px, py = 795, 105
-    s.append(f'<style>:root {{ --peak: {px}px {py}px; }}</style>')
-    s.append(f'<circle class="pulse" cx="{px}" cy="{py}" r="22" fill="none" stroke="{t["accent"]}" stroke-width="1.5"/>')
-    s.append(f'<g class="fade f4"><circle cx="{px}" cy="{py}" r="7" fill="none" stroke="{t["accent"]}" stroke-width="1.5"/>'
-             f'<circle cx="{px}" cy="{py}" r="2.5" fill="{t["accent"]}"/></g>')
-
-    # north arrow, on a small halo so it stays readable over the contours
-    s.append(f'<g class="fade f2"><rect x="938" y="52" width="28" height="66" fill="{t["bg"]}" fill-opacity="0.85"/>'
-             f'<g stroke="{t["muted"]}" fill="none" stroke-width="1.2"><path d="M952 96V66 M952 66l-5 9 M952 66l5 9"/></g>'
-             f'<text class="serif" x="952" y="112" font-size="11" fill="{t["muted"]}" text-anchor="middle">N</text></g>')
-
-    # ---- title block ----
-    s.append(f'<text class="mono fade f1" x="60" y="78" font-size="12" fill="{t["accent"]}" letter-spacing="3">◉ BESANÇON, FRANCE</text>')
-    s.append(f'<text class="serif fade f2" x="58" y="128" font-size="50" font-weight="bold" '
-             f'style="font-variant: small-caps" fill="{t["ink"]}" letter-spacing="2">Louis Pocheron</text>')
-    s.append(f'<g class="fade f2" stroke="{t["frame"]}" stroke-width="1"><path d="M60 144h368"/></g>')
-    s.append(f'<text class="mono fade f3" x="60" y="170" font-size="14" fill="{t["contour"]}" letter-spacing="4">GEOSPATIAL SOFTWARE ENGINEER</text>')
-    s.append(f'<text class="mono fade f4" x="60" y="196" font-size="12" fill="{t["muted"]}" letter-spacing="1">maps · tiles · pointclouds — @ DaVikingCode</text>')
-
-    # scale bar
-    s.append(f'<g class="fade f4"><g stroke="{t["muted"]}" stroke-width="1"><path d="M60 222h120 M60 218v8 M120 218v8 M180 218v8"/></g>'
-             f'<rect x="60" y="220" width="30" height="4" fill="{t["muted"]}"/>'
-             f'<rect x="120" y="220" width="30" height="4" fill="{t["muted"]}"/>'
-             f'<text class="mono" x="188" y="226" font-size="9" fill="{t["muted"]}">1:25 000</text></g>')
-
-    s.append("</svg>")
+    lede_css, lede_svg = lede(t)
+    rise = NAME_SIZE * 0.06
+    s = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" role="img" '
+        f'aria-label="Louis Pocheron — application designer &amp; developer, GIS &amp; mapping, Besançon">',
+        "<style>",
+        MONO_FACE(),
+        font_face("Archivo Name", "archivo-name.woff2"),
+        f".mono {{ {MONO} }}",
+        ".name { font-family: 'Archivo Name', 'Archivo Narrow', 'Arial Narrow', sans-serif; font-weight: 800; }",
+        # No backwards fill: while a version waits for its slot, its opacity="0" holds.
+        f".v {{ animation: slot {CYCLE:.0f}s infinite; }}",
+        f"@keyframes slot {{ 0%, {100 / len(VERSIONS) - 0.01:.2f}% {{ opacity: 1; }} {100 / len(VERSIONS):.2f}%, 100% {{ opacity: 0; }} }}",
+        lede_css,
+        ".rise { animation: rise .9s cubic-bezier(.2,.7,.2,1) both; }",
+        f"@keyframes rise {{ from {{ transform: translateY({NAME_SIZE}px); }} }}",
+        ".ring { transform-origin: %dpx %dpx; animation: ring 3s ease-out 1s infinite; }" % (MX, MY),
+        "@keyframes ring { 0% { opacity: .8; transform: scale(.5); } 70%, 100% { opacity: 0; transform: scale(1.8); } }",
+        "@media (prefers-reduced-motion: reduce) {",
+        "  .v, .typed, .rise, .ring { animation: none !important; } .v { opacity: 0; } .v0 { opacity: 1; } .ring { opacity: 0; } }",
+        "</style>",
+        f'<rect width="{W}" height="{H}" fill="{t["paper"]}"/>',
+        # the site's header: name of the job, specialty, address
+        f'<g class="mono" font-size="11" fill="{t["muted"]}">'
+        f'<text x="16" y="31" fill="{t["ink"]}">Louis Pocheron</text>'
+        f'<text x="250" y="31">Application designer &amp; developer</text>'
+        f'<text x="560" y="31">GIS &amp; mapping at industrial scale</text>'
+        f'<text x="984" y="31" text-anchor="end" fill="{t["ink"]}">louis-pocheron.com ↗</text></g>',
+        f'<path d="M16 44.5H984" stroke="{t["ink"]}" stroke-width="1"/>',
+        graticule(t),
+        f'<rect x="{FX0}" y="{FY0}" width="{FX1 - FX0}" height="{FY1 - FY0}" fill="none" stroke="{t["ink"]}" stroke-width="1"/>',
+        # the name, each word rising out of the parallel it stands on
+        f'<clipPath id="above"><rect x="{FX0}" y="{FY0}" width="{MX - FX0}" height="{MY - FY0 + rise:.1f}"/></clipPath>',
+        f'<g clip-path="url(#above)" class="name" font-size="{NAME_SIZE}" letter-spacing="{-0.03 * NAME_SIZE:.1f}" fill="{t["ink"]}">'
+        f'<text class="rise" x="52" y="{MY}" word-spacing="{0.12 * NAME_SIZE:.0f}">Louis Pocheron</text></g>',
+        f'<path d="M{FX0} {MY + 0.5}H{MX - 16}" stroke="{t["ink"]}" stroke-width="1"/>',
+        # Besançon
+        f'<circle class="ring" cx="{MX}" cy="{MY}" r="14" fill="none" stroke="{t["accent"]}" stroke-width="1.5" opacity="0"/>',
+        f'<circle cx="{MX}" cy="{MY}" r="14" fill="none" stroke="{t["accent"]}" stroke-width="1"/>',
+        f'<rect x="{MX - 5}" y="{MY - 5}" width="10" height="10" fill="{t["accent"]}"/>',
+        f'<g class="mono" font-size="11" fill="{t["ink"]}"><text x="{MX + 26}" y="{MY + 22}">Besançon</text>'
+        f'<text x="{MX + 26}" y="{MY + 38}" fill="{t["muted"]}">{sexagesimal(LAT)} N · {sexagesimal(LON)} E</text></g>',
+        lede_svg,
+        # the scale: 1 km at this pitch
+        scale(t),
+        statusline(t),
+        "</svg>",
+    ]
     return "\n".join(s)
+
+
+def scale(t):
+    km = LAT_MINUTE * 1000 / 1852
+    x1, y = FX1 - 48, FY1 - 16
+    x0 = x1 - km
+    return (f'<g class="mono" font-size="9" fill="{t["muted"]}"><text x="{x0 - 6:.1f}" y="{y + 4}" text-anchor="end">0</text>'
+            f'<text x="{x1 + 6}" y="{y + 4}">1 km</text></g>'
+            f'<rect x="{x0:.1f}" y="{y}" width="{km:.1f}" height="4" fill="none" stroke="{t["ink"]}" stroke-width="1"/>'
+            f'<rect x="{x0:.1f}" y="{y}" width="{km / 2:.1f}" height="4" fill="{t["ink"]}"/>')
 
 
 def main():
@@ -275,7 +194,7 @@ def main():
     for mode in THEMES:
         svg = render(mode)
         (out / f"header-{mode}.svg").write_text(svg)
-        print(f"wrote assets/header-{mode}.svg ({len(svg)//1024} KB)")
+        print(f"wrote assets/header-{mode}.svg ({len(svg) // 1024} KB)")
 
 
 if __name__ == "__main__":
