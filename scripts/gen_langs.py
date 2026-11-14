@@ -9,7 +9,7 @@ import os
 import urllib.request
 from pathlib import Path
 
-from charte import MONO, MONO_FACE, THEMES
+from charte import THEMES, text
 
 USER = "Popoch39"
 TOP_N = 6
@@ -53,8 +53,6 @@ def render(langs, mode):
     svg = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" aria-label="Top languages">',
         "<style>",
-        MONO_FACE(),
-        f".mono {{ {MONO} }}",
         ".bar { transform-origin: %dpx 0; animation: grow 1.2s cubic-bezier(0.4, 0, 0.2, 1) both; }" % bar_x,
         "@keyframes grow { from { transform: scaleX(0); } }",
         "@media (prefers-reduced-motion: reduce) { .bar { animation: none; } }",
@@ -62,8 +60,8 @@ def render(langs, mode):
         f'<rect width="{w}" height="{h}" fill="{t["paper"]}"/>',
         f'<rect x="10.5" y="10.5" width="{w-21}" height="{h-21}" fill="none" stroke="{t["ink"]}" stroke-width="1"/>',
         f'<rect x="28" y="31" width="9" height="9" fill="{t["accent"]}"/>',
-        f'<text class="mono" x="46" y="40" font-size="12" fill="{t["ink"]}" letter-spacing="2">Top languages</text>',
-        f'<text class="mono" x="{w-28}" y="40" font-size="10" fill="{t["muted"]}" text-anchor="end">by bytes of code</text>',
+        text("Top languages", 46, 40, 12, t["ink"], tracking=2),
+        text("by bytes of code", w - 28, 40, 10, t["muted"], anchor="end"),
         f'<path d="M28 50.5h{w-56}" stroke="{t["rule"]}" stroke-width="1"/>',
     ]
     for i, (name, pct) in enumerate(rows):
@@ -71,9 +69,9 @@ def render(langs, mode):
         bw = max(8, bar_max * pct / max_pct)
         delay = 0.12 * i
         svg += [
-            f'<text class="mono" x="28" y="{y+4}" font-size="12" fill="{t["ink"]}">{name}</text>',
+            text(name, 28, y + 4, 12, t["ink"]),
             f'<rect class="bar" style="animation-delay:{delay:.2f}s" x="{bar_x}" y="{y-4}" width="{bw:.1f}" height="8" fill="{t["ink"]}"/>',
-            f'<text class="mono" x="{pct_x}" y="{y+4}" font-size="11" fill="{t["muted"]}" text-anchor="end">{pct:.1f}%</text>',
+            text(f"{pct:.1f}%", pct_x, y + 4, 11, t["muted"], anchor="end"),
         ]
     svg.append("</svg>")
     return "\n".join(svg)

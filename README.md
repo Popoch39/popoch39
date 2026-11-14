@@ -2,7 +2,7 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/header-dark.svg">
     <source media="(prefers-color-scheme: light)" srcset="assets/header-light.svg">
-    <img src="assets/header-light.svg" alt="Louis Pocheron — application designer & developer, GIS & mapping at industrial scale, Besançon. I build the maps for your power grid." width="100%">
+    <img src="assets/header-light.svg" alt="Louis Pocheron — Geospatial Software Engineer. Tile servers, caches and point clouds. Besançon, France." width="100%">
   </picture>
 </a>
 
