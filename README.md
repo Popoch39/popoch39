@@ -69,6 +69,15 @@ Application designer & developer at [Da Viking Code](https://github.com/DaViking
   </tr>
 </table>
 
+## Open source
+
+<!-- CONTRIBUTIONS:START -->
+- **[typecraft-dev/oma-cast](https://github.com/typecraft-dev/oma-cast)** <sub>★ 563</sub>
+  - [Show the launcher on outputs scaled below 1](https://github.com/typecraft-dev/oma-cast/pull/101) <sub>#101 · Nov 2026</sub>
+- **[tr3v3r/react-native-esc-pos-printer](https://github.com/tr3v3r/react-native-esc-pos-printer)** <sub>★ 284</sub>
+  - [fix(android): stop disconnect from looping forever on ERR_ILLEGAL](https://github.com/tr3v3r/react-native-esc-pos-printer/pull/252) <sub>#252 · Oct 2026</sub>
+<!-- CONTRIBUTIONS:END -->
+
 ## Career
 
 ```
